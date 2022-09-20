@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class PrepareAnvilEvents implements Listener {
     @SuppressWarnings("ConstantConditions")
@@ -32,6 +33,8 @@ public class PrepareAnvilEvents implements Listener {
                 Map<Enchantment, Integer> enchantments = new HashMap<>();
 
                 for (Enchantment enchantment : input.getEnchantments().keySet()) {
+                    if (hasConflicts(enchantment, input1.getEnchantments().keySet())) return;
+
                     if (enchantment.getMaxLevel() > 1) {
                         if (input.getEnchantmentLevel(enchantment) == input1.getEnchantmentLevel(enchantment)
                                 && (!resultEnchantments.containsKey(enchantment)
@@ -54,6 +57,8 @@ public class PrepareAnvilEvents implements Listener {
                 }
 
                 for (Enchantment enchantment : input1.getEnchantments().keySet()) {
+                    if (hasConflicts(enchantment, input.getEnchantments().keySet())) return;
+
                     if (enchantment.getMaxLevel() > 1) {
                         if (input1.getEnchantmentLevel(enchantment) == input.getEnchantmentLevel(enchantment)
                                 && (!resultEnchantments.containsKey(enchantment)
@@ -84,6 +89,8 @@ public class PrepareAnvilEvents implements Listener {
                 Map<Enchantment, Integer> enchantments = new HashMap<>();
 
                 for (Enchantment enchantment : ((EnchantmentStorageMeta) input.getItemMeta()).getStoredEnchants().keySet()) {
+                    if (hasConflicts(enchantment, input1.getEnchantments().keySet())) return;
+
                     if (enchantment.getMaxLevel() > 1) {
                         if (enchantmentStorageMeta.getStoredEnchantLevel(enchantment) == enchantmentStorageMeta1.getStoredEnchantLevel(enchantment)
                                 && (!resultEnchantments.containsKey(enchantment)
@@ -106,6 +113,8 @@ public class PrepareAnvilEvents implements Listener {
                 }
 
                 for (Enchantment enchantment : ((EnchantmentStorageMeta) input1.getItemMeta()).getStoredEnchants().keySet()) {
+                    if (hasConflicts(enchantment, input.getEnchantments().keySet())) return;
+
                     if (enchantment.getMaxLevel() > 1) {
                         if (enchantmentStorageMeta1.getStoredEnchantLevel(enchantment) == enchantmentStorageMeta.getStoredEnchantLevel(enchantment)
                                 && (!resultEnchantments.containsKey(enchantment)
@@ -131,12 +140,14 @@ public class PrepareAnvilEvents implements Listener {
                 enchantments.forEach((enchantment, level) -> ((EnchantmentStorageMeta) resultMeta).addStoredEnchant(enchantment, level, true));
                 result.setItemMeta(resultMeta);
                 event.setResult(result);
-            } else if (!(input.getItemMeta() instanceof EnchantmentStorageMeta)  && input1.getItemMeta() instanceof EnchantmentStorageMeta) {
+            } else if (!(input.getItemMeta() instanceof EnchantmentStorageMeta) && input1.getItemMeta() instanceof EnchantmentStorageMeta) {
                 final EnchantmentStorageMeta enchantmentStorageMeta1 = (EnchantmentStorageMeta) input1.getItemMeta();
                 final Map<Enchantment, Integer> resultEnchantments = result.getItemMeta().getEnchants();
                 Map<Enchantment, Integer> enchantments = new HashMap<>();
 
                 for (Enchantment enchantment : input.getEnchantments().keySet()) {
+                    if (hasConflicts(enchantment, input1.getEnchantments().keySet())) return;
+
                     if (enchantment.getMaxLevel() > 1) {
                         if (input.getEnchantmentLevel(enchantment) == enchantmentStorageMeta1.getStoredEnchantLevel(enchantment)
                                 && (!resultEnchantments.containsKey(enchantment)
@@ -159,6 +170,8 @@ public class PrepareAnvilEvents implements Listener {
                 }
 
                 for (Enchantment enchantment : ((EnchantmentStorageMeta) input1.getItemMeta()).getStoredEnchants().keySet()) {
+                    if (hasConflicts(enchantment, input.getEnchantments().keySet())) return;
+
                     if (enchantment.getMaxLevel() > 1) {
                         if (enchantmentStorageMeta1.getStoredEnchantLevel(enchantment) == input.getEnchantmentLevel(enchantment)
                                 && (!resultEnchantments.containsKey(enchantment)
@@ -184,5 +197,14 @@ public class PrepareAnvilEvents implements Listener {
                 event.setResult(result);
             }
         }
+    }
+
+    private boolean hasConflicts(Enchantment check, Set<Enchantment> enchantmentSet) {
+        for (Enchantment enchantment : enchantmentSet) {
+            if (enchantment.conflictsWith(check)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -1,5 +1,5 @@
 name: IllegalEnchantments
-version: '${project.version}'
+version: "${project.version}"
 main: nathan.illegalenchantments.IllegalEnchantments
 author: "Elephant_1214"
 description: A somewhat hacky way to allow players to get enchantments up to double the normal levels

@@ -13,11 +13,12 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("ConstantConditions")
-public class PrepareAnvilEventsV2 implements Listener {
+public class PrepareAnvilEvents implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void processIllegalEnchantments(PrepareAnvilEvent event) {
         final AnvilInventory anvilInventory = event.getInventory();
@@ -151,13 +152,12 @@ public class PrepareAnvilEventsV2 implements Listener {
     }
 
     @NotNull
-    private static Set<Enchantment> getConflicting(Set<Enchantment> inputEnchantments, Set<Enchantment> enchantmentsToCheck) {
-        if (inputEnchantments != null && enchantmentsToCheck != null) {
-            for (Enchantment enchantment : inputEnchantments) {
-                enchantmentsToCheck.removeIf(check -> check.conflictsWith(enchantment));
-            }
+    private static Set<Enchantment> getConflicting(final Set<Enchantment> inputEnchantments, final Set<Enchantment> enchantmentsToCheck) {
+        Set<Enchantment> toCheck = new HashSet<>(enchantmentsToCheck);
+        for (Enchantment enchantment : inputEnchantments) {
+            toCheck.removeIf(check -> check.conflictsWith(enchantment));
         }
-        return enchantmentsToCheck;
+        return toCheck;
     }
 
     private static boolean levelsCanBeAdded(final Enchantment enchantment, final ItemStack input, final ItemStack input1, final Map<Enchantment, Integer> resultEnchantments) {

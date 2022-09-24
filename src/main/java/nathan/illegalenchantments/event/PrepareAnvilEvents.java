@@ -135,7 +135,7 @@ public class PrepareAnvilEvents implements Listener {
 
     @NotNull
     private static ItemStack createResult(ItemStack input, ItemStack input1, ItemStack result, Map<Enchantment, Integer> finalEnchantments) {
-        if (result.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta && result.getType().equals(Material.ENCHANTED_BOOK)) {
+        if (result.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta) {
             finalEnchantments.forEach((enchantment, level) -> enchantmentStorageMeta.addStoredEnchant(enchantment, level, true));
             result.setItemMeta(enchantmentStorageMeta);
         } else {
@@ -161,41 +161,52 @@ public class PrepareAnvilEvents implements Listener {
     }
 
     private static boolean levelsCanBeAdded(final Enchantment enchantment, final ItemStack input, final ItemStack input1, final Map<Enchantment, Integer> resultEnchantments) {
+        final int inputEnchLevel = input.getEnchantmentLevel(enchantment);
+        final int resultEnchLevel = resultEnchantments.get(enchantment);
+        final int doubleMaxLevel = enchantment.getMaxLevel() * 2;
+        final boolean resultContainsEnch = resultEnchantments.containsKey(enchantment);
+
         if (input.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta && input1.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta1) {
-            return enchantmentStorageMeta.getStoredEnchantLevel(enchantment) == enchantmentStorageMeta1.getStoredEnchantLevel(enchantment)
-                    && (!resultEnchantments.containsKey(enchantment) || resultEnchantments.get(enchantment) < enchantmentStorageMeta.getStoredEnchantLevel(enchantment) + 1)
-                    && !(enchantmentStorageMeta.getStoredEnchantLevel(enchantment) + 1 > enchantment.getMaxLevel() * 2);
+            final int storedEnchLevel = enchantmentStorageMeta.getStoredEnchantLevel(enchantment);
+
+            return storedEnchLevel == enchantmentStorageMeta1.getStoredEnchantLevel(enchantment)
+                    && (!resultContainsEnch || resultEnchLevel < storedEnchLevel + 1)
+                    && !(storedEnchLevel + 1 > doubleMaxLevel);
         } else if (!(input.getItemMeta() instanceof EnchantmentStorageMeta) && input1.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta1) {
-            return input.getEnchantmentLevel(enchantment) == enchantmentStorageMeta1.getStoredEnchantLevel(enchantment)
-                    && (!resultEnchantments.containsKey(enchantment) || resultEnchantments.get(enchantment) < input.getEnchantmentLevel(enchantment) + 1)
-                    && !(input.getEnchantmentLevel(enchantment) + 1 > enchantment.getMaxLevel() * 2);
+            return inputEnchLevel == enchantmentStorageMeta1.getStoredEnchantLevel(enchantment)
+                    && (!resultContainsEnch || resultEnchLevel < inputEnchLevel + 1)
+                    && !(inputEnchLevel + 1 > doubleMaxLevel);
         }
-        return input.getEnchantmentLevel(enchantment) == input1.getEnchantmentLevel(enchantment)
-                && (!resultEnchantments.containsKey(enchantment) || resultEnchantments.get(enchantment) < input.getEnchantmentLevel(enchantment) + 1)
-                && !(input.getEnchantmentLevel(enchantment) + 1 > enchantment.getMaxLevel() * 2);
+        return inputEnchLevel == input1.getEnchantmentLevel(enchantment)
+                && (!resultContainsEnch || resultEnchLevel < inputEnchLevel + 1)
+                && !(inputEnchLevel + 1 > doubleMaxLevel);
     }
 
     private static boolean firstInputIsHigher(final Enchantment enchantment, final ItemStack input, final ItemStack input1, final Map<Enchantment, Integer> resultEnchantments) {
-        if (input.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta
-                && input1.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta1) {
+        final int inputEnchLevel = input.getEnchantmentLevel(enchantment);
+        final int resultEnchLevel = resultEnchantments.get(enchantment);
+        final boolean resultContainsEnch = resultEnchantments.containsKey(enchantment);
+
+        if (input.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta && input1.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta1) {
             return enchantmentStorageMeta.getStoredEnchantLevel(enchantment) > enchantmentStorageMeta1.getStoredEnchantLevel(enchantment)
-                    && (!resultEnchantments.containsKey(enchantment) || resultEnchantments.get(enchantment) < enchantmentStorageMeta.getStoredEnchantLevel(enchantment));
-        } else if (!(input.getItemMeta() instanceof EnchantmentStorageMeta)
-                && input1.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta1) {
-            return input.getEnchantmentLevel(enchantment) > enchantmentStorageMeta1.getStoredEnchantLevel(enchantment)
-                    && (!resultEnchantments.containsKey(enchantment) || resultEnchantments.get(enchantment) < input.getEnchantmentLevel(enchantment));
+                    && (!resultContainsEnch || resultEnchLevel < enchantmentStorageMeta.getStoredEnchantLevel(enchantment));
+        } else if (!(input.getItemMeta() instanceof EnchantmentStorageMeta) && input1.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta1) {
+            return inputEnchLevel > enchantmentStorageMeta1.getStoredEnchantLevel(enchantment)
+                    && (!resultContainsEnch || resultEnchLevel < inputEnchLevel);
         }
-        return input.getEnchantmentLevel(enchantment) > input1.getEnchantmentLevel(enchantment)
-                && (!resultEnchantments.containsKey(enchantment) || resultEnchantments.get(enchantment) < input.getEnchantmentLevel(enchantment));
+        return inputEnchLevel > input1.getEnchantmentLevel(enchantment)
+                && (!resultContainsEnch || resultEnchLevel < inputEnchLevel);
     }
 
     private static boolean enchNotMoreThanDouble(final Enchantment enchantment, final ItemStack input, final Map<Enchantment, Integer> resultEnchantments) {
+        final boolean resultContainsEnch = resultEnchantments.containsKey(enchantment);
+
         if (input.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta) {
             return !(enchantmentStorageMeta.getStoredEnchantLevel(enchantment) > enchantment.getMaxLevel() * 2)
-                    && (!resultEnchantments.containsKey(enchantment) || resultEnchantments.get(enchantment) < enchantmentStorageMeta.getStoredEnchantLevel(enchantment));
+                    && (!resultContainsEnch || resultEnchantments.get(enchantment) < enchantmentStorageMeta.getStoredEnchantLevel(enchantment));
         }
         return !(input.getEnchantmentLevel(enchantment) > enchantment.getMaxLevel() * 2)
-                && (!resultEnchantments.containsKey(enchantment) || resultEnchantments.get(enchantment) < input.getEnchantmentLevel(enchantment));
+                && (!resultContainsEnch || resultEnchantments.get(enchantment) < input.getEnchantmentLevel(enchantment));
     }
 
 }

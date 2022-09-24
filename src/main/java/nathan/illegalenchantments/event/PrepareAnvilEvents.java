@@ -135,7 +135,7 @@ public class PrepareAnvilEvents implements Listener {
 
     @NotNull
     private static ItemStack createResult(ItemStack input, ItemStack input1, ItemStack result, Map<Enchantment, Integer> finalEnchantments) {
-        if (result.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta) {
+        if (result.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta && result.getType().equals(Material.ENCHANTED_BOOK)) {
             finalEnchantments.forEach((enchantment, level) -> enchantmentStorageMeta.addStoredEnchant(enchantment, level, true));
             result.setItemMeta(enchantmentStorageMeta);
         } else {
@@ -155,7 +155,7 @@ public class PrepareAnvilEvents implements Listener {
     private static Set<Enchantment> getConflicting(final Set<Enchantment> inputEnchantments, final Set<Enchantment> enchantmentsToCheck) {
         Set<Enchantment> toCheck = new HashSet<>(enchantmentsToCheck);
         for (Enchantment enchantment : inputEnchantments) {
-            toCheck.removeIf(check -> check.conflictsWith(enchantment));
+            toCheck.removeIf(ench -> ench.conflictsWith(enchantment));
         }
         return toCheck;
     }

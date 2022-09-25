@@ -1,6 +1,7 @@
 package nathan.illegalenchantments.event;
 
 import nathan.illegalenchantments.IllegalEnchantments;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
@@ -16,6 +17,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static nathan.illegalenchantments.IllegalEnchantments.plugin;
 
 @SuppressWarnings("ConstantConditions")
 public class PrepareAnvilEvents implements Listener {
@@ -135,13 +138,14 @@ public class PrepareAnvilEvents implements Listener {
 
     @NotNull
     private static ItemStack createResult(final ItemStack input, final ItemStack input1, final ItemStack result, final Map<Enchantment, Integer> finalEnchantments) {
-        if (result.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta && Material.ENCHANTED_BOOK.equals(result.getType())) {
-            finalEnchantments.forEach((enchantment, level) -> enchantmentStorageMeta.addStoredEnchant(enchantment, level, true));
+        Map<Enchantment, Integer> finalEnchants = new HashMap<>(finalEnchantments);
+        if (result.getItemMeta() instanceof EnchantmentStorageMeta enchantmentStorageMeta && Material.ENCHANTED_BOOK.equals(result.getType())) {
+            finalEnchants.forEach((enchantment, level) -> enchantmentStorageMeta.addStoredEnchant(enchantment, level, true));
             result.setItemMeta(enchantmentStorageMeta);
         } else {
             Set<Enchantment> conflicting = getConflicting(enchantmentSet(input), enchantmentSet(input1));
-            if (!conflicting.isEmpty()) conflicting.forEach(finalEnchantments::remove);
-            result.addUnsafeEnchantments(finalEnchantments);
+            if (!conflicting.isEmpty()) conflicting.forEach(finalEnchants::remove);
+            result.addUnsafeEnchantments(finalEnchants);
         }
         return result;
     }
@@ -153,9 +157,13 @@ public class PrepareAnvilEvents implements Listener {
 
     @NotNull
     private static Set<Enchantment> getConflicting(final Set<Enchantment> inputEnchantments, final Set<Enchantment> enchantmentsToCheck) {
-        Set<Enchantment> toCheck = new HashSet<>(enchantmentsToCheck);
+        Set<Enchantment> toCheck = new HashSet<>();
         for (Enchantment enchantment : inputEnchantments) {
-            toCheck.removeIf(ench -> !ench.conflictsWith(enchantment));
+            for (Enchantment ench : enchantmentsToCheck) {
+                if (enchantment.conflictsWith(ench) && !enchantment.getKey().equals(ench.getKey())) {
+                    toCheck.add(ench);
+                }
+            }
         }
         return toCheck;
     }

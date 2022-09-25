@@ -5,7 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class IllegalEnchantments extends JavaPlugin {
 
-    public static final String VERSION = "1.2.3";
+    public static final String VERSION = "1.2.4";
     public static int maximumLevel;
     public static JavaPlugin plugin = null;
 

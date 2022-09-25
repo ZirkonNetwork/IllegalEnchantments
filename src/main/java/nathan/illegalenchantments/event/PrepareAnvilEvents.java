@@ -1,6 +1,7 @@
 package nathan.illegalenchantments.event;
 
 import nathan.illegalenchantments.IllegalEnchantments;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -134,7 +135,7 @@ public class PrepareAnvilEvents implements Listener {
 
     @NotNull
     private static ItemStack createResult(final ItemStack input, final ItemStack input1, final ItemStack result, final Map<Enchantment, Integer> finalEnchantments) {
-        if (result.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta) {
+        if (result.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta && Material.ENCHANTED_BOOK.equals(result.getType())) {
             finalEnchantments.forEach((enchantment, level) -> enchantmentStorageMeta.addStoredEnchant(enchantment, level, true));
             result.setItemMeta(enchantmentStorageMeta);
         } else {
@@ -161,7 +162,7 @@ public class PrepareAnvilEvents implements Listener {
 
     private static boolean levelsCanBeAdded(final Enchantment enchantment, final ItemStack input, final ItemStack input1, final Map<Enchantment, Integer> resultEnchantments) {
         final int inputEnchLevel = input.getEnchantmentLevel(enchantment);
-        final int resultEnchLevel = resultEnchantments.get(enchantment);
+        final int resultEnchLevel = resultEnchantments.getOrDefault(enchantment, 0);
         final int doubleMaxLevel = enchantment.getMaxLevel() * 2;
         final boolean resultContainsEnch = resultEnchantments.containsKey(enchantment);
 
@@ -183,7 +184,7 @@ public class PrepareAnvilEvents implements Listener {
 
     private static boolean firstInputIsHigher(final Enchantment enchantment, final ItemStack input, final ItemStack input1, final Map<Enchantment, Integer> resultEnchantments) {
         final int inputEnchLevel = input.getEnchantmentLevel(enchantment);
-        final int resultEnchLevel = resultEnchantments.get(enchantment);
+        final int resultEnchLevel = resultEnchantments.getOrDefault(enchantment, 0);
         final boolean resultContainsEnch = resultEnchantments.containsKey(enchantment);
 
         if (input.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta && input1.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta1) {
@@ -198,7 +199,7 @@ public class PrepareAnvilEvents implements Listener {
     }
 
     private static boolean enchNotMoreThanDouble(final Enchantment enchantment, final ItemStack input, final Map<Enchantment, Integer> resultEnchantments) {
-        final int resultEnchLevel = resultEnchantments.get(enchantment);
+        final int resultEnchLevel = resultEnchantments.getOrDefault(enchantment, 0);
         final boolean resultContainsEnch = resultEnchantments.containsKey(enchantment);
 
         if (input.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta) {

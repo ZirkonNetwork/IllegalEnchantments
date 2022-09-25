@@ -1,7 +1,6 @@
 package nathan.illegalenchantments.event;
 
 import nathan.illegalenchantments.IllegalEnchantments;
-import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -134,13 +133,13 @@ public class PrepareAnvilEvents implements Listener {
     }
 
     @NotNull
-    private static ItemStack createResult(ItemStack input, ItemStack input1, ItemStack result, Map<Enchantment, Integer> finalEnchantments) {
+    private static ItemStack createResult(final ItemStack input, final ItemStack input1, final ItemStack result, final Map<Enchantment, Integer> finalEnchantments) {
         if (result.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta) {
             finalEnchantments.forEach((enchantment, level) -> enchantmentStorageMeta.addStoredEnchant(enchantment, level, true));
             result.setItemMeta(enchantmentStorageMeta);
         } else {
             Set<Enchantment> conflicting = getConflicting(enchantmentSet(input), enchantmentSet(input1));
-            if (!conflicting.isEmpty() && !result.getType().equals(Material.ENCHANTED_BOOK)) conflicting.forEach(finalEnchantments::remove);
+            if (!conflicting.isEmpty()) conflicting.forEach(finalEnchantments::remove);
             result.addUnsafeEnchantments(finalEnchantments);
         }
         return result;
@@ -155,7 +154,7 @@ public class PrepareAnvilEvents implements Listener {
     private static Set<Enchantment> getConflicting(final Set<Enchantment> inputEnchantments, final Set<Enchantment> enchantmentsToCheck) {
         Set<Enchantment> toCheck = new HashSet<>(enchantmentsToCheck);
         for (Enchantment enchantment : inputEnchantments) {
-            toCheck.removeIf(ench -> ench.conflictsWith(enchantment));
+            toCheck.removeIf(ench -> !ench.conflictsWith(enchantment));
         }
         return toCheck;
     }

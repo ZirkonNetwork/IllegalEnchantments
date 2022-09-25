@@ -95,8 +95,8 @@ public class PrepareAnvilEvents implements Listener {
                     }
                     // add enchants to result from map and save result
                     event.setResult(createResult(input, input1, result, finalEnchantments));
-                } else if (!(input.getItemMeta() instanceof EnchantmentStorageMeta) && input1.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta1) {
-                    final Map<Enchantment, Integer> resultEnchantments = result.getItemMeta().getEnchants();
+                } else if (!(input.getItemMeta() instanceof EnchantmentStorageMeta) && !input.getEnchantments().isEmpty() && input1.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta1) {
+                    final Map<Enchantment, Integer> resultEnchantments = result.getEnchantments();
                     Map<Enchantment, Integer> finalEnchantments = new HashMap<>();
 
                     for (Enchantment enchantment : enchantmentSet(input)) {
@@ -198,14 +198,15 @@ public class PrepareAnvilEvents implements Listener {
     }
 
     private static boolean enchNotMoreThanDouble(final Enchantment enchantment, final ItemStack input, final Map<Enchantment, Integer> resultEnchantments) {
+        final int resultEnchLevel = resultEnchantments.get(enchantment);
         final boolean resultContainsEnch = resultEnchantments.containsKey(enchantment);
 
         if (input.getItemMeta() instanceof final EnchantmentStorageMeta enchantmentStorageMeta) {
             return !(enchantmentStorageMeta.getStoredEnchantLevel(enchantment) > enchantment.getMaxLevel() * 2)
-                    && (!resultContainsEnch || resultEnchantments.get(enchantment) < enchantmentStorageMeta.getStoredEnchantLevel(enchantment));
+                    && (!resultContainsEnch || resultEnchLevel < enchantmentStorageMeta.getStoredEnchantLevel(enchantment));
         }
         return !(input.getEnchantmentLevel(enchantment) > enchantment.getMaxLevel() * 2)
-                && (!resultContainsEnch || resultEnchantments.get(enchantment) < input.getEnchantmentLevel(enchantment));
+                && (!resultContainsEnch || resultEnchLevel < input.getEnchantmentLevel(enchantment));
     }
 
 }
